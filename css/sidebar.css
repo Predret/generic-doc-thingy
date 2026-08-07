@@ -1,0 +1,15 @@
+@import url("theme.css");
+
+.sidebar {
+    position: fixed;
+    top: var(--topbar-height);
+    left: 0px;
+    width: var(--sidebar-width);
+    height: calc(100% - var(--topbar-height));
+
+    background-color: var(--background-dark);
+}
+
+/*.theme_mode {
+
+}*/

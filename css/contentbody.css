@@ -1,0 +1,15 @@
+@import url(theme.css);
+
+.content-body {
+    position: fixed;
+    top: var(--topbar-height);
+    left: var(--sidebar-width);
+    height: calc(100% - var(--topbar-height));
+    width: calc(100% - var(--sidebar-width));
+
+    background-color: var(--background-main);
+
+    padding: 0px 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
