@@ -32,7 +32,7 @@ class DevSideBar extends HTMLElement {
       <aside class = "sidebar">
           <div class = "page-browser"></div> <!-- like, file system looking thingy -->
           <div class = "theme-mode">
-          <button id = theme_button><img src="${background_switcher_svg_path}" class="theme_switch"></button>
+          <button id = theme_button class=theme_switch_button><img src="${background_switcher_svg_path}" class="theme_switch"></button>
           </div> <!--light/dark mode-->
       </aside>
       `;
