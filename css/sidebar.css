@@ -10,6 +10,7 @@
     background-color: var(--background-dark);
 }
 
-/*.theme_mode {
-
-}*/
+.theme_switch {
+    width: 50px;
+    height: 50px;
+}
