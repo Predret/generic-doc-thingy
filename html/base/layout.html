@@ -5,12 +5,27 @@
 
 
 <header class = "topbar">
-    <div class = "project-display"></div> <!-- project logo/name -->
+    <div class = "project-display">
+        <span class="project-name">Project Name</span> <!--add this, remove it, idc -->
+    </div> <!-- project logo/name -->
     <div class = "git-status-display"></div> <!-- what git commit is this, and possibly run a command -->
     <div class = "global-search"></div> <!-- like ctrl + f, but searches every page -->
     <div class = "hyper-links"></div> <!-- for example to the git repo -->
 </header>
 <aside class = "sidebar">
     <div class = "page-browser"></div> <!-- like, file system looking thingy -->
-    <div class = "background-mode"></div> <!--light/dark mode-->
+    <div class = "background-mode">
+        <button id = theme_button><img src="../../images/dark_mode.svg" class="theme_switch"></button>
+    </div> <!--light/dark mode-->
+    <script>
+      const html = document.documentElement;
+      const themeButton = document.getElementById("theme_button");
+
+      themeButton.addEventListener("click", () => {
+        const currentTheme = html.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+        html.setAttribute("data-theme", newTheme);
+      });
+    </script>
 </aside>

@@ -1,8 +1,17 @@
+import {
+  background_switcher_svg_path,
+  sidebar_theme_css,
+  topbar_theme_css,
+  contentbody_css,
+} from "./paths.js"
+
 class DevTopBar extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <header class = "topbar">
-          <div class = "project-display"></div> <!-- project logo/name -->
+          <div class = "project-display">
+              <span class="project-name">Project Name</span> <!--add this, remove it, idc -->
+          </div> <!-- project logo/name -->
           <div class = "git-status-display"></div> <!-- what git commit is this, and possibly run a command -->
           <div class = "global-search"></div> <!-- like ctrl + f, but searches every page -->
           <div class = "hyper-links"></div> <!-- for example to the git repo -->
@@ -16,17 +25,29 @@ class DevSideBar extends HTMLElement {
       <aside class = "sidebar">
           <div class = "page-browser"></div> <!-- like, file system looking thingy -->
           <div class = "theme-mode">
+          <button id = theme_button><img src="${background_switcher_svg_path}" class="theme_switch"></button>
           </div> <!--light/dark mode-->
       </aside>
       `;
+    const themeButton = this.querySelector("#theme_button");
+
+    themeButton.addEventListener("click", () => {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute("data-theme");
+
+      const newTheme =
+        currentTheme === "dark" ? "light" : "dark";
+
+      html.setAttribute("data-theme", newTheme);
+    });
   }
 }
 class DevLayoutCSS extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
-      <link rel="stylesheet" href = "css/sidebar.css">
-      <link rel="stylesheet" href = "css/topbar.css">
-      <link rel="stylesheet" href = "css/contentbody.css">
+      <link rel="stylesheet" href = "${sidebar_theme_css}">
+      <link rel="stylesheet" href = "${topbar_theme_css}">
+      <link rel="stylesheet" href = "${contentbody_css}">
       `;
   }
 }

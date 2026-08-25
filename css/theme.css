@@ -10,3 +10,11 @@
     --text-secondary-color: #777777;
     --border-color: #A0A0A0;
 }
+[data-theme="dark"] {
+    --background-main: #222222;
+    --background-light: #333333;
+    --background-dark: #050505;
+    --text-primary-color: #FFFFFF;
+    --text-secondary-color: #777777;
+    --border-color: #404040;
+}
