@@ -13,3 +13,9 @@
     box-sizing: border-box;
     overflow-y: auto;
 }
+.maintext {
+    color: var(--text-primary-color);
+}
+.secondtext {
+    color: var(--text-secondary-color);
+}

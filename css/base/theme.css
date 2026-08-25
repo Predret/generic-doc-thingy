@@ -1,5 +1,4 @@
 :root {
-
     --topbar-height: calc(30px + 5%);
     --sidebar-width: calc(150px + 5%);
 
@@ -17,4 +16,7 @@
     --text-primary-color: #FFFFFF;
     --text-secondary-color: #777777;
     --border-color: #404040;
+}
+:root {
+    background-color: var(--background-dark);
 }

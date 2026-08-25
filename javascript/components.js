@@ -5,6 +5,11 @@ import {
   contentbody_css,
 } from "./paths.js"
 
+{
+  const savedtheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedtheme)
+}
+
 class DevTopBar extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
@@ -14,7 +19,9 @@ class DevTopBar extends HTMLElement {
           </div> <!-- project logo/name -->
           <div class = "git-status-display"></div> <!-- what git commit is this, and possibly run a command -->
           <div class = "global-search"></div> <!-- like ctrl + f, but searches every page -->
-          <div class = "hyper-links"></div> <!-- for example to the git repo -->
+          <div class = "hyper-links">
+            <button class="hyper-link-button" onclick="window.open('https://github.com/Predret/generic-doc-thingy', '_blank')"><span class="repo-link">Download docs</span></button>
+          </div> <!-- for example to the git repo -->
       </header>
       `;
   }
@@ -39,6 +46,7 @@ class DevSideBar extends HTMLElement {
         currentTheme === "dark" ? "light" : "dark";
 
       html.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
     });
   }
 }
