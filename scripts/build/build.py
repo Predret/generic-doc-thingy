@@ -6,8 +6,8 @@ from pathlib import Path
 from typing import TypeAlias
 
 HERE = Path(__file__).resolve()
-ROOT = HERE.parent/Path("../..").resolve()
-DOC_FOLDER: Path = HERE.parent/Path("../../html/docs").resolve()
+ROOT = (HERE.parent/Path("../..")).resolve()
+DOC_FOLDER: Path = (HERE.parent/Path("../../html/docs")).resolve()
 GEN_FOLDER: Path = ROOT/"generated"
 OUTPUT: Path = GEN_FOLDER/"tree.json"
 if (not ROOT.is_dir()):
