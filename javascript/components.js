@@ -10,7 +10,7 @@ import {
   document.documentElement.setAttribute("data-theme", savedtheme)
 }
 
-class DevTopBar extends HTMLElement {
+class DocTopBar extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <header class = "topbar">
@@ -26,7 +26,7 @@ class DevTopBar extends HTMLElement {
       `;
   }
 }
-class DevSideBar extends HTMLElement {
+class DocSideBar extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <aside class = "sidebar">
@@ -50,7 +50,7 @@ class DevSideBar extends HTMLElement {
     });
   }
 }
-class DevLayoutCSS extends HTMLElement {
+class DocLayoutCSS extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <link rel="stylesheet" href = "${sidebar_theme_css}">
@@ -59,7 +59,7 @@ class DevLayoutCSS extends HTMLElement {
       `;
   }
 }
-class DevTitle extends HTMLElement {
+class DocTitle extends HTMLElement {
   connectedCallback() {
     setTimeout(() => {
       const customPageName = this.innerHTML.trim() || "documentation"
@@ -68,7 +68,21 @@ class DevTitle extends HTMLElement {
     }, 0);
   }
 }
-customElements.define('dev-topbar', DevTopBar)
-customElements.define('dev-sidebar', DevSideBar)
-customElements.define('dev-layout-css', DevLayoutCSS)
-customElements.define('dev-title', DevTitle)
+class DocHeader extends HTMLElement {
+  connectedCallback() {
+    const name = this.getAttribute("name") || "";
+    if (!name.trim()) { throw new Error("DocHeader requires a name. Use a normal header instead.")}
+    let size = Number(this.getAttribute("size") || 1);
+    if (!Number.isInteger(size) || size < 1  || size > 6) { throw new Error("DocHeader has an invalid size. (1-6)"); }
+    const inputInnerHTML = this.innerHTML
+    this.innerHTML = `
+      <h${size} id="${name}" class="maintext">${inputInnerHTML}</h${size}>
+      `
+  }
+}
+
+customElements.define('doc-topbar', DocTopBar);
+customElements.define('doc-sidebar', DocSideBar);
+customElements.define('doc-layout-css', DocLayoutCSS);
+customElements.define('doc-title', DocTitle);
+customElements.define('doc-header', DocHeader);

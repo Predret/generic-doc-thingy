@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from time import perf_counter
 from typing import TypeAlias
 
 HERE = Path(__file__).resolve()
@@ -141,9 +142,15 @@ def write_output():
         _ = file.write("\n")
     _ = temp_path.replace(OUTPUT)
 
-
+start_build = perf_counter()
 doc_folder = get_root_folder()
 scan_directories(doc_folder)
+after_scan = perf_counter()
+elapsed = after_scan - start_build
+print("Finished scanning directories in " + format(elapsed, ".6f") + " seconds.")
 print(serialize_instance(doc_folder))
+after_serialize = perf_counter()
+elapsed = after_serialize - after_scan
+print("Finished serializing in " + format(elapsed, ".6f") + " seconds.")
 write_output()
 # test push
