@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from html.parser import HTMLParser
 from pathlib import Path
 from time import perf_counter
-from typing import TypeAlias
+from typing import TypeAlias, override
 
 HERE = Path(__file__).resolve()
 ROOT = (HERE.parent/Path("../..")).resolve()
@@ -19,17 +20,23 @@ if (not DOC_FOLDER.is_dir()):
 
 
 class FileInstance:
-    class DocFile:
+    class Data:
         def __init__(self, path: Path, mod_time: datetime) -> None:
             self.path = path
             self.mod_time = mod_time
         path: Path
         mod_time: datetime
+    class DocFile:
+        def __init__(self, data: FileInstance.Data, headers: list[str]) -> None:
+            self.data = data
+            self.headers = headers
+        data: FileInstance.Data
+        headers: list[str]
     class Folder:
-        def __init__(self, data: FileInstance.DocFile, contents: list[AnyFileInstance]) -> None:
+        def __init__(self, data: FileInstance.Data, contents: list[AnyFileInstance]) -> None:
             self.data = data
             self.contents = contents
-        data: FileInstance.DocFile
+        data: FileInstance.Data
         contents: list[AnyFileInstance]
     class Project:
         def __init__(self, folder: FileInstance.Folder, icon: Path | None) -> None:
@@ -40,10 +47,10 @@ class FileInstance:
 
 AnyFileInstance: TypeAlias = FileInstance.DocFile | FileInstance.Folder | FileInstance.Project
 
-def get_docfile(path: Path) -> FileInstance.DocFile:
+def get_filedata(path: Path) -> FileInstance.Data:
     mod_time = datetime.fromtimestamp(path.stat().st_mtime).astimezone(UTC)
-    doc_file = FileInstance.DocFile(path=path, mod_time=mod_time)
-    return doc_file
+    data = FileInstance.Data(path=path, mod_time=mod_time)
+    return data
 def get_icon_helper(path: Path) -> Path | None:
     try:
         with path.open("r", encoding="utf-8") as file:
@@ -66,17 +73,58 @@ def get_icon(path: Path) -> Path | None:
        print(f"Icon from {path} is gives an invalid path: {icon}")
     return icon
 
+class DocHeaderParser(HTMLParser):
+    def __init__(self, file_path: Path) -> None:
+        super().__init__()
+        self.file_path = file_path
+        self.names = []
+    file_path: Path
+    names: list[str]
 
-def scan_directories(folder: FileInstance.Folder):
+    @override
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
+        if (tag != "doc-header"):
+            return
+        attributes = dict(attrs)
+        name = attributes.get("name")
+
+        if (name is None or not name.strip()):
+            print("Warning. Doc header's name is null in path " + str(self.file_path) + "Skipping it.")
+            return
+        self.names.append(name)
+
+def get_doc_headers(path: Path) -> list[str]:
+    parser = DocHeaderParser(path)
+
+    try:
+        with path.open("r", encoding="utf-8") as file:
+            for chunk in iter(lambda: file.read(64*1024), ""):
+                parser.feed(chunk)
+    except (OSError, UnicodeDecodeError) as error:
+        print(f"Warning: could not read {path}: {error}")
+        return []
+    parser.close()
+    return parser.names
+
+def get_docfile(path: Path) -> FileInstance.DocFile:
+    data = get_filedata(path)
+    headers = get_doc_headers(path)
+    return FileInstance.DocFile(data, headers)
+
+
+def scan_directories(folder: FileInstance.Folder) -> None:
     for file_instance in folder.data.path.iterdir():
         if (file_instance.is_file()):
             if (file_instance.suffix != ".html"):
                 continue
-            doc_file = get_docfile(file_instance)
-            folder.data.mod_time = max(folder.data.mod_time, doc_file.mod_time)
+            doc_file: FileInstance.DocFile = get_docfile(file_instance)
+            folder.data.mod_time = max(folder.data.mod_time, doc_file.data.mod_time)
             folder.contents.append(doc_file)
         elif (file_instance.is_dir()):
-            data = get_docfile(file_instance)
+            if (file_instance.is_symlink()):
+                print("Warning: a folder symlink detected!")
+                continue
+            data = get_filedata(file_instance)
             subfolder = FileInstance.Folder(data=data, contents=[])
             scan_directories(subfolder)
             folder.data.mod_time = max(folder.data.mod_time, subfolder.data.mod_time)
@@ -90,19 +138,19 @@ def scan_directories(folder: FileInstance.Folder):
             folder.contents.append(subfolder)
 
 def get_root_folder() -> FileInstance.Folder:
-    data = FileInstance.DocFile(path=DOC_FOLDER, mod_time=datetime.min.replace(tzinfo=UTC))
+    data = FileInstance.Data(path=DOC_FOLDER, mod_time=datetime.min.replace(tzinfo=UTC))
     return FileInstance.Folder(data, [])
 
 def debug_folders_scan(folder: FileInstance.Folder) -> str:
     to_print: str = ""
     for file_instance in folder.contents:
-        if (type(file_instance) == FileInstance.DocFile):
-            to_print += "DocFile: " + str(file_instance.path) + "mod: " + str(file_instance.mod_time) + "\n"
-        if (type(file_instance) == FileInstance.Folder):
+        if (isinstance(file_instance, FileInstance.DocFile)):
+            to_print += "DocFile: " + str(file_instance.data.path) + "mod: " + str(file_instance.data.mod_time) + "\n"
+        if (isinstance(file_instance, FileInstance.Folder)):
             to_print += "Folder: " + str(file_instance.data.path) + "mod: " + str(file_instance.data.mod_time) + "\n"
             to_print += debug_folders_scan(file_instance)
             to_print += "endfolder: " + str(file_instance.data.path.name) + "\n"
-        if (type(file_instance) ==  FileInstance.Project):
+        if (isinstance(file_instance, FileInstance.Project)):
             to_print += "Project: " + str(file_instance.folder.data.path) + "icon: " + str(file_instance.icon) + "mod: " + str(file_instance.folder.data.mod_time) + "\n"
             to_print += debug_folders_scan(file_instance.folder)
             to_print += "endproj: " + str(file_instance.folder.data.path.name) + "\n"
@@ -112,8 +160,9 @@ def serialize_instance(instance: AnyFileInstance) -> dict[str, object]:
     if (isinstance(instance, FileInstance.DocFile)):
         return {
             "type": "docfile",
-            "path": str(instance.path.relative_to(ROOT)),
-            "mod_time": instance.mod_time.isoformat()
+            "path": str(instance.data.path.relative_to(ROOT)),
+            "mod_time": instance.data.mod_time.isoformat(),
+            "headers": instance.headers
         }
     if (isinstance(instance, FileInstance.Folder)):
         return {
@@ -130,7 +179,7 @@ def serialize_instance(instance: AnyFileInstance) -> dict[str, object]:
         "icon": str(instance.icon.relative_to(ROOT)) if instance.icon else None,
         "contents": [ serialize_instance(child) for child in instance.folder.contents ]
     }
-def write_output():
+def write_output() -> None:
     GEN_FOLDER.mkdir(exist_ok=True, parents=True)
     output = {
         "root": serialize_instance(doc_folder)

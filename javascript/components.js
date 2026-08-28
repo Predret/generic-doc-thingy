@@ -18,7 +18,7 @@ class DocTopBar extends HTMLElement {
               <span class="project-name">Project Name</span> <!--add this, remove it, idc -->
           </div> <!-- project logo/name -->
           <div class = "git-status-display"></div> <!-- what git commit is this, and possibly run a command -->
-          <div class = "global-search"></div> <!-- like ctrl + f, but searches every page -->
+          <!--<div class = "global-search"></div> --> <!-- like ctrl + f, but searches every page. Commented out; Unsure.-->
           <div class = "hyper-links">
             <button class="hyper-link-button" onclick="window.open('https://github.com/Predret/generic-doc-thingy', '_blank')"><span class="repo-link">Download docs</span></button>
           </div> <!-- for example to the git repo -->
