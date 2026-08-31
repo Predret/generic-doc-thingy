@@ -12,6 +12,12 @@ ROOT = (HERE.parent/Path("../..")).resolve()
 DOC_FOLDER: Path = (HERE.parent/Path("../../html/docs")).resolve()
 GEN_FOLDER: Path = ROOT/"generated"
 OUTPUT: Path = GEN_FOLDER/"tree.json"
+
+PROJECT_FOLDER: Path = OUTPUT/"project"
+SEARCH_FOLDER: Path = OUTPUT/"search"
+
+MAX_SEARCH_FILE_BYTE = 1024 * 1024
+
 if (not ROOT.is_dir()):
     raise RuntimeError("Root folder is not present!")
 if (not DOC_FOLDER.is_dir()):
