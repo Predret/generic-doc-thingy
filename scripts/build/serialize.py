@@ -1,6 +1,6 @@
 from typing import Any
 
-from build.types import AnyNonProjFileInstance, FileInstance
+from build.build_types import AnyNonProjFileInstance, FileInstance
 from build.globals import global_tree
 from build.paths import GEN_FOLDER, ROOT
 from build.scan import get_project_from_project_path, get_projlink_from_project_path

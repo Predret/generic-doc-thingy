@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import override
 
-from build.types import FileInstance
+from build.build_types import FileInstance
 from scripts.build.paths import ROOT
 
 
